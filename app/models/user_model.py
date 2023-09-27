@@ -2,12 +2,11 @@ from ..database import DatabaseConnection
 
 
 class User:
-    def __init__(self, user_id: int = None, users: str = None, passwords: str = None,
+    def __init__(self, user_id: str = None, users: str = None,
                  email: str = None, first_name: str = None,
                  last_name: str = None, birthday_date: str = None):
         self.user_id = user_id
         self.users = users
-        self.passwords = passwords
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
@@ -17,15 +16,15 @@ class User:
 # Serializa el objeto Usuario en un diccionario
 
     def serialize(self):
-        return {
+        method_serialize = {
             "user_id": self.user_id,
             "users": self.users,
-            "passwords": self.passwords,
             "email": self.email,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "birthday_date": self.birthday_date,
+            "birthday_date": self.birthday_date
         }
+        return method_serialize
 
 # Creacion de un nuevo Usuario
 
@@ -61,8 +60,8 @@ class User:
         Returns:
             - list: List of Film objects
         """
-        query = """SELECT users, passwords, email, first_name, last_name, birthday_date
-                FROM app_coding.users 
+        query = """SELECT user_id, users, email, first_name, last_name, birthday_date
+                FROM app_coding.users
                 WHERE user_id = %s"""
         params = (user.user_id,)
         results = DatabaseConnection.fetch_one(query, params=params)
