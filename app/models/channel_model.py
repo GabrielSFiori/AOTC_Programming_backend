@@ -1,5 +1,4 @@
-import mysql
-from database import DatabaseConnection
+from ..database import DatabaseConnection
 
 
 class ChannelModel:

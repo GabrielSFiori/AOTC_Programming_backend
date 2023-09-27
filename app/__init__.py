@@ -21,6 +21,7 @@ def init_app():
     app.config.from_object(
         Config
     )
+
     DatabaseConnection.set_config(app.config)
 
     app.register_blueprint(messages_bp, url_prefix='/get_messages')

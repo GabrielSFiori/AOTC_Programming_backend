@@ -1,6 +1,7 @@
 from flask import jsonify, request
+from mysql.connector import Error as mysqlErrors
 from ..models.user_model import User
-# from ..models.exception import CustomException
+from ..models.exception import *
 
 
 class UserController:
@@ -26,20 +27,22 @@ class UserController:
             return jsonify({"message": "Error al crear el usuario"}), 500
 
     @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/usuarios METODO GET
-    def get_usuarios(cls):
-        usuarios = User.obtener_usuarios()
-        if usuarios:
-            return jsonify([usuario.serialize() for usuario in usuarios]), 200
-        else:
-            return jsonify({"message": "No se encontraron usuarios"}), 404
+    def get_all(cls):
+        respuesta = User.get_all()
+        if respuesta is not None:
+            return respuesta, 200
+        raise NotFound()
 
-    @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/usuarios/1 METODO GET
-    def obtener_usuario_por_id(cls, user_id):
-        usuario = User.obtener_usuario_por_id(user_id)
-        if usuario:
-            return jsonify(usuario.serialize()), 200
+    @classmethod
+    def get(cls, user_id):
+        """Get a user by id"""
+        user = User(user_id=user_id)  # Crear una instancia de User
+        # Llamar al método get de la instancia de User
+        result = User.get(user)
+        if result is not None:
+            return result.serialize(), 200
         else:
-            return jsonify({"message": "Usuario no encontrado"}), 404
+            raise NotFound()
 
     @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/usuarios/1 METODO PUT
     def actualizar_usuario(cls, user_id):
@@ -55,3 +58,9 @@ class UserController:
             return jsonify({"message": "Usuario eliminado exitosamente"}), 200
         else:
             return jsonify({"message": "Error al eliminar el usuario"}), 500
+
+    @classmethod
+    def control_existe_usuario(cls, id_usuario):
+        if not (User.user_exist(id_usuario)):
+            raise UsuarioNoEncontrado(
+                "El usuario con id={} no se encontro en la base de datos.".format(id_usuario))

@@ -1,93 +1,77 @@
-from database import DatabaseConnection
+from ..database import DatabaseConnection
 
 
 class User:
-    def __init__(self, **kwargs):
-        self.user_id = kwargs.get('user_id')
-        self.username = kwargs.get('users')
-        self.password = kwargs.get('password')
-        self.email = kwargs.get('email')
-        self.first_name = kwargs.get('first_name')
-        self.last_name = kwargs.get('last_name')
-        self.birthday_date = kwargs.get('birthday_date')
-        self.creation_date = kwargs.get('creation_date')
-        self.last_login = kwargs.get('last_login')
-        self.status_id = kwargs.get('status_id')
-        self.avatar_url = kwargs.get('avatar_url', None)
+    def __init__(self, user_id: int = None, users: str = None, passwords: str = None,
+                 email: str = None, first_name: str = None,
+                 last_name: str = None, birthday_date: str = None):
+        self.user_id = user_id
+        self.users = users
+        self.passwords = passwords
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.birthday_date = birthday_date
+
 
 # Serializa el objeto Usuario en un diccionario
-    def serialize(self):
-        user_dict = {
-            'user_id': self.user_id,
-            'username': self.username,
-            'password': self.password,
-            'email': self.email,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'birthday_date': self.birthday_date,
-            'creation_date': self.creation_date,
-            'last_login': self.last_login,
-            'status_id': self.status_id,
-            'avatar_url': self.avatar_url
-        }
-        return user_dict
 
+    def serialize(self):
+        return {
+            "user_id": self.user_id,
+            "users": self.users,
+            "passwords": self.passwords,
+            "email": self.email,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "birthday_date": self.birthday_date,
+        }
 
 # Creacion de un nuevo Usuario
 
     @classmethod
     def crear_usuario(cls, user):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
-
-        insert_query = "INSERT INTO users (users, password, email, first_name, last_name, birthday_date, creation_date, last_login, status_id, avatar_url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        insert_query = "INSERT INTO users (users, passwords, email, first_name, last_name, birthday_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         values = (
-            user.username, user.password, user.email,
+            user.username, user.passwords, user.email,
             user.first_name, user.last_name, user.date_of_birth,
             user.creation_date, user.last_login, user.status_id,
             user.avatar_url
         )
+        DatabaseConnection.execute_query(insert_query, values)
 
-        cursor.execute(insert_query, values)
-        conn.commit()
-
-        user_id = cursor.lastrowid
-        cursor.close()
-        conn.close()
-
-        return user_id
 # Obtener un Usuario
 
     @classmethod
-    def obtener_usuarios(cls):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor(dictionary=True)
+    def get_all(cls):
+        """Get all users
+        Returns:
+            - list: List of User objects
+        """
+        query = """SELECT * FROM app_coding.users"""
 
-        select_query = "SELECT * FROM users"
-        cursor.execute(select_query)
-        usuarios = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-
-        return [cls(**usuario) for usuario in usuarios]
+        results = DatabaseConnection.fetch_all(query=query)
+        usuarios = list(results)
+        return usuarios
 
 # Obtener un Usuario por ID
     @classmethod
-    def obtener_usuario_por_id(cls, user_id):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor(dictionary=True)
+    def get(cls, user):
+        """Get users for id
+        Returns:
+            - list: List of Film objects
+        """
+        query = """SELECT users, passwords, email, first_name, last_name, birthday_date
+                FROM app_coding.users 
+                WHERE user_id = %s"""
+        params = (user.user_id,)
+        results = DatabaseConnection.fetch_one(query, params=params)
 
-        select_query = "SELECT * FROM users WHERE user_id = %s"
-        cursor.execute(select_query, (user_id,))
-        usuario = cursor.fetchone()
+        if results is not None:
+            return cls(*results)
+        return None
 
-        cursor.close()
-        conn.close()
-
-        return usuario
 # Actualizar un Usuario
-
     @classmethod
     def actualizar_usuario(cls, user_id, new_date):
         conn = DatabaseConnection.connect()
@@ -124,3 +108,10 @@ class User:
         conn.close()
 
         return True
+
+    @classmethod
+    def user_exist(cls, user_id):
+        consulta = """SELECT u.user_id FROM app_coding.users as u WHERE u.user_id = %s"""
+        response = DatabaseConnection.fetch_one(
+            consulta=consulta, parametros=user_id)
+        return response != None

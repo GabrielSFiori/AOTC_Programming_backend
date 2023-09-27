@@ -1,8 +1,9 @@
 from flask import jsonify
 
+
 class CustomException(Exception):
 
-    def __init__(self, status_code, name = "Custom Error", description = 'Error'): 
+    def __init__(self, status_code, name="Custom Error", description='Error'):
         super().__init__()
         self.description = description
         self.name = name
@@ -19,22 +20,36 @@ class CustomException(Exception):
         response.status_code = self.status_code
         return response
 
+
 class BadRequest(CustomException):
 
-    def __init__(self, description = 'Solcitud inválida'):
-        super().__init__(400, name = "Bad Request", description = description)
-    
+    def __init__(self, description='Solcitud inválida'):
+        super().__init__(400, name="Bad Request", description=description)
+
+
 class NotFound(CustomException):
 
-    def __init__(self, description = 'Recurso no encontrado'):
-        super().__init__(404, name = "Not Found", description = description)
+    def __init__(self, description='Recurso no encontrado'):
+        super().__init__(404, name="Not Found", description=description)
+
 
 class InternalServerError(CustomException):
 
-    def __init__(self, description = 'Error interno del servidor'):
-        super().__init__(500, name = "Internal Server Error", description = description)
+    def __init__(self, description='Error interno del servidor'):
+        super().__init__(500, name="Internal Server Error", description=description)
+
 
 class MethodNotAllowed(CustomException):
 
-    def __init__(self, description = 'Método no permitido'):
-        super().__init__(405, name = "Method Not Allowed", description = description)
+    def __init__(self, description='Método no permitido'):
+        super().__init__(405, name="Method Not Allowed", description=description)
+
+
+class UsuarioNoEncontrado(CustomException):
+    def __init__(self, description="No se encontro el usuario en la base de datos."):
+        super().__init__(500, name="User not registered", description=description)
+
+
+class DataBaseError(CustomException):
+    def __init__(self, description="Error al conectarse a la Base."):
+        super().__init__(500, name="Database error", description=description)
