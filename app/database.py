@@ -50,25 +50,50 @@ class DatabaseConnection:
             cls._connection = None
 
     @classmethod
-    def traer_uno(cls, consulta, parametros=None, formato=None, diccionario=False):
-        cursor = cls.conectarse().cursor(dictionary=diccionario)
-        if parametros != None:
+    def get_all(cls, consulta, query=None, formato=None, diccionario=False):
+        cursor = cls.get_connection().cursor(dictionary=diccionario)
+        if query != None:
             try:
-                iter(parametros)
-                if not (isinstance(parametros, str)):
-                    if isinstance(parametros, datetime):
+                iter(query)
+                if not (isinstance(query, str)):
+                    if isinstance(query, datetime):
                         try:
                             cursor.execute(
-                                consulta, parametros.strftime(formato))
+                                consulta, query.strftime(formato))
                         except:
                             cursor.execute(
-                                consulta, parametros.strftime("%Y-%m-%d"))
+                                consulta, query.strftime("%Y-%m-%d"))
                     else:
-                        cursor.execute(consulta, parametros)
+                        cursor.execute(consulta, query)
                 else:
-                    cursor.execute(consulta, (parametros, ))
+                    cursor.execute(consulta, (query, ))
             except TypeError:
-                cursor.execute(consulta, (str(parametros), ))
+                cursor.execute(consulta, (str(query), ))
         else:
             cursor.execute(consulta)
-        return cursor.fetchone()
+        return cursor.fetchall()
+
+    @classmethod
+    def execute_query_pr(cls, query, params=None, formato=None, diccionario=False):
+        cursor = cls.get_connection().cursor(dictionary=diccionario)
+        if params != None:
+            try:
+                iter(params)
+                if not (isinstance(params, str)):
+                    if isinstance(params, datetime):
+                        try:
+                            cursor.execute(
+                                query, params.strftime(formato))
+                        except:
+                            cursor.execute(
+                                query, params.strftime("%Y-%m-%d"))
+                    else:
+                        cursor.execute(query, params)
+                else:
+                    cursor.execute(query, (params, ))
+            except TypeError:
+                cursor.execute(query, (str(params), ))
+        else:
+            cursor.execute(query)
+        cls._connection.commit()
+        return cursor

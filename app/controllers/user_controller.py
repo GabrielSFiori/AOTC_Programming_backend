@@ -1,4 +1,5 @@
 from flask import jsonify, request
+import re
 from mysql.connector import Error as mysqlErrors
 from ..models.user_model import User
 from ..models.exception import *
@@ -6,32 +7,33 @@ from ..models.exception import *
 
 class UserController:
 
-    @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/usuarios METODO POST
-    def crear_usuario(cls):
+    @classmethod
+    def create_user(cls):
         data = request.json
-        nuevo_usuario = User(
-            username=data.get('users'),
-            password=data.get('password'),
+
+        params = User(
+            users=data.get('users'),
+            passwords=data.get('passwords'),
             email=data.get('email'),
             first_name=data.get('first_name'),
             last_name=data.get('last_name'),
             birthday_date=data.get('birthday_date'),
-            avatar_url=data.get('avatar_url')
         )
+        try:
+            User.create_user(params)
+        except mysqlErrors as error:
+            raise DataBaseError(
+                f"Se produjo un error al intentar insertar un nuevo usuario en la base de datos {error}")
+        return {"Mensaje": "Se Creo el usuario con exito."}, 201
 
-        user_id = User.crear_usuario(nuevo_usuario)
-
-        if user_id:
-            return jsonify({"user_id": user_id}), 201
-        else:
-            return jsonify({"message": "Error al crear el usuario"}), 500
-
-    @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/usuarios METODO GET
+    @classmethod
     def get_all(cls):
-        respuesta = User.get_all()
-        if respuesta is not None:
-            return respuesta, 200
-        raise NotFound()
+        try:
+            rta = User.get_all()
+        except mysqlErrors as error:
+            raise DataBaseError(
+                "Se produjo un error al cargar todos los usuarios de la base de datos. {}".format(error))
+        return rta, 200
 
     @classmethod
     def get(cls, user_id):
@@ -44,20 +46,25 @@ class UserController:
         else:
             raise NotFound()
 
-    @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/usuarios/1 METODO PUT
-    def actualizar_usuario(cls, user_id):
-        data = request.json
-        if User.actualizar_usuario(user_id, data):
-            return jsonify({"message": "Usuario actualizado exitosamente"}), 200
-        else:
-            return jsonify({"message": "Error al actualizar el usuario"}), 500
+    @classmethod
+    def update_user_endpoint(cls, user_id):
+        new_data = request.json
+        try:
+            user = User(**new_data)
+            user.user_id = user_id
+            User.update_user_pr(user)
+            return {"mensaje": f"Se modificaron con éxito los datos del usuario con id={user_id}."}, 200
+        except mysqlErrors as error:
+            raise DataBaseError(
+                f"Se produjo un error al momento de actualizar los datos del usuario con id={user_id} en la base de datos. {error}")
 
-    @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/usuarios/1 METODO DELETE
-    def eliminar_usuario(cls, user_id):
-        if User.eliminar_usuario(user_id):
+    @classmethod
+    def delete_user(cls, user_id: int):
+        try:
+            User.delete(user_id)
             return jsonify({"message": "Usuario eliminado exitosamente"}), 200
-        else:
-            return jsonify({"message": "Error al eliminar el usuario"}), 500
+        except Exception as e:
+            return jsonify({"message": f"Error al eliminar el usuario: {str(e)}"}), 500
 
     @classmethod
     def control_existe_usuario(cls, id_usuario):
