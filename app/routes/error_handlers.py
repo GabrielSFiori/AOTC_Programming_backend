@@ -3,21 +3,28 @@ from ..models.exception import *
 
 errors = Blueprint("errors", __name__)
 
+
 @errors.app_errorhandler(BadRequest)
 def handle_bad_request(error):
     return error.get_response(), error.status_code
 
+
 @errors.app_errorhandler(NotFound)
 def handle_not_found(error):
-    return error.get_response(), error.status_code
+    response = jsonify({"error": "Not Found", "message": str(error)})
+    response.status_code = error.status_code  # Set the HTTP status code
+    return response
+
 
 @errors.app_errorhandler(InternalServerError)
 def handle_internal_server_error(error):
     return error.get_response(), error.status_code
 
+
 @errors.app_errorhandler(MethodNotAllowed)
 def handle_method_not_allowed(error):
     return error.get_response(), error.status_code
+
 
 @errors.app_errorhandler(404)
 def handle_werkzeug_bad_request(error):
@@ -32,6 +39,7 @@ def handle_werkzeug_bad_request(error):
     })
     response.content_type = "application/json"
     return response
+
 
 @errors.app_errorhandler(405)
 def handle_werkzeug_method_not_allowed(error):

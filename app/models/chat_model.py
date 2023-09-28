@@ -36,10 +36,10 @@ class Messages:
         return None
 
     @classmethod
-    def create_message(cls, message):
-        query = """INSERT INTO app_coding.content (content, id_user, date_day, date_time, id_channel) VALUES (%s, %s, CURDATE(), CURTIME(), %s);"""
+    def create_message(cls, messages):
+        query = """INSERT INTO app_coding.chats (id_msg, id_user, content, date_day, date_time, id_channel) VALUES (%s, %s, %s, CURDATE(), CURTIME(), %s);"""
 
-        params = message.content, message.id_user, message.id_channel
+        params = messages.content, messages.id_user, messages.id_channel
         DatabaseConnection.execute_query(query, params=params)
 
     @classmethod

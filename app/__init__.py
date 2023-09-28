@@ -16,7 +16,9 @@ def init_app():
     app = Flask(__name__, static_folder=Config.STATIC_FOLDER,
                 template_folder=Config.TEMPLATE_FOLDER)
 
-    CORS(app, supports_credentials=True)
+    CORS(app,
+         resources={r"/api/*": {"origins": "*"}},
+         supports_credentials=True)
 
     app.config.from_object(
         Config
@@ -26,7 +28,7 @@ def init_app():
 
     app.register_blueprint(messages_bp, url_prefix='/get_messages')
 
-    app.register_blueprint(login_bp, url_prefix='/login')
+    app.register_blueprint(login_bp)
 
     app.register_blueprint(sign_up_bp, url_prefix='/signup')
 

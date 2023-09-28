@@ -1,21 +1,43 @@
 from ..database import DatabaseConnection
 
-from flask import jsonify, session
-
 
 class Login:
+
     def __init__(self, **kwargs):
-        self.username = kwargs.get('username', None)
-        self.email = kwargs.get('email', None)
-        self.password = kwargs.get('password', None)
+        self.user_id = kwargs.get('user_id')
+        self.first_name = kwargs.get('first_name')
+        self.last_name = kwargs.get('last_name')
+        self.users = kwargs.get('users')
+        self.email = kwargs.get('email')
+        self.passwords = kwargs.get('passwords')
+        self.birthday_date = kwargs.get('birthday_date')
 
     @classmethod
-    def login(cls, user):
-        query = """SELECT users, email, passwords FROM app_coding.users AS USU WHERE email = %(email)s AND passwords = %(password)s;"""
+    def is_registered(cls, user):
+        query = """SELECT user_id FROM app_coding.users 
+        WHERE email = %(email)s and passwords = %(passwords)s"""
         params = user.__dict__
-        response = DatabaseConnection.fetch_one(query, params=params)
+        result = DatabaseConnection.fetch_one(query, params=params)
 
-        if response is not None:
-            session['username'] = response[0]
-            return response
+        if result is not None:
+            return True
+        return False
+
+    @classmethod
+    def get(cls, user):
+        query = """SELECT * FROM app_coding.users 
+        WHERE email = %(email)s"""
+        params = user.__dict__
+        result = DatabaseConnection.fetch_one(query, params=params)
+
+        if result is not None:
+            return cls(
+                user_id=result[0],
+                first_name=result[1],
+                last_name=result[2],
+                users=result[3],
+                email=result[4],
+                passwords=result[5],
+                birthday_date=result[6]
+            )
         return None

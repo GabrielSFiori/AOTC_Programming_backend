@@ -28,9 +28,10 @@ class BadRequest(CustomException):
 
 
 class NotFound(CustomException):
-
-    def init(self, description='Recurso no encontrado'):
-        super().init(404, name="Not Found", description=description)
+    def __init__(self, description="Out of range", status_code=404):
+        self.description = description
+        self.status_code = status_code
+        super().__init__(self.description)
 
 
 class InternalServerError(CustomException):

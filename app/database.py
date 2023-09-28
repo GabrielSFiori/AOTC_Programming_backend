@@ -34,6 +34,7 @@ class DatabaseConnection:
     def fetch_all(cls, query, database_name=None, params=None):
         cursor = cls.get_connection().cursor()
         cursor.execute(query, params)
+
         return cursor.fetchall()
 
     @classmethod
