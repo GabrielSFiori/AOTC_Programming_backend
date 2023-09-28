@@ -51,7 +51,6 @@ class User:
         return users
 
 # Obtener un Usuario por ID
-
     @classmethod
     def get(cls, user):
         """Get users for id
@@ -69,17 +68,6 @@ class User:
         return None
 
 # Actualizar un Usuario
-
-    @classmethod
-    def update_user(cls, user_id, new_data):
-        query = "UPDATE app_coding.users SET users=%s, passwords=%s, email=%s, first_name=%s, last_name=%s,    birthday_date=%s WHERE user_id=%s"
-        params = (
-            new_data['users'], new_data['passwords'],
-            new_data['email'], new_data['first_name'],
-            new_data['last_name'], new_data['birthday_date'], user_id
-        )
-        DatabaseConnection.execute_query_pr(query=query, params=params)
-
     @classmethod
     def update_user_pr(cls, user):
         query = """UPDATE app_coding.users as u SET

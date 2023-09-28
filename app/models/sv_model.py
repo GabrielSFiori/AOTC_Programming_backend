@@ -29,35 +29,20 @@ class Server:
 # Creacion de un nuevo Servidor
     @classmethod
     def create_server(cls, server):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
 
-        insert_query = "INSERT INTO servers (name_server, description_server) VALUES (%s, %s)"
-        values = (server.name_server, server.description_server)
+        query = "INSERT INTO app_coding.servers (name_server, description_server) VALUES (%s, %s)"
+        params = (server.name_server, server.description_server)
+        DatabaseConnection.execute_query_pr(query, params)
 
-        cursor.execute(insert_query, values)
-        conn.commit()
-
-        server_id = cursor.lastrowid
-        cursor.close()
-        conn.close()
-
-        return server_id
 # Obtener un Servidor
-
     @classmethod
-    def get_servers(cls):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor(dictionary=True)
+    def get_all_servers(cls):
+        consulta = """SELECT * FROM app_coding.servers"""
+        results = DatabaseConnection.get_all(
+            consulta=consulta, diccionario=True)
+        users = list(results)
+        return users
 
-        select_query = "SELECT * FROM servers"
-        cursor.execute(select_query)
-        servers = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-
-        return [cls(**server) for server in servers]
 # Actualizar un Servidor
 
     @classmethod

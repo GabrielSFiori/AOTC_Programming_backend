@@ -39,12 +39,12 @@ class Messages:
     def create_message(cls, messages):
         query = """INSERT INTO app_coding.chats (id_msg, id_user, content, date_day, date_time, id_channel) VALUES (%s, %s, %s, CURDATE(), CURTIME(), %s);"""
 
-        params = messages.content, messages.id_user, messages.id_channel
+        params = messages.id_msg, messages.id_user, messages.content, messages.dateday, messages.date_time, messages.id_channel
         DatabaseConnection.execute_query(query, params=params)
 
     @classmethod
     def update_message(cls, id_msg, message):
-        query = """UPDATE app_coding.content AS chats SET chats.content = %s, chats.date_day = CURDATE(), chats.date_time = CURTIME() WHERE chats.id_msg = %s;"""
+        query = """UPDATE app_coding.chats AS content SET chats.content = %s, chats.date_day = CURDATE(), chats.date_time = CURTIME() WHERE chats.id_msg = %s;"""
 
         params = message.content, id_msg
         DatabaseConnection.execute_query(query, params=params)

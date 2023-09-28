@@ -5,9 +5,9 @@ from config import Config
 from .database import DatabaseConnection
 from .routes.chat_route import messages_bp
 from .routes.login_route import login_bp
-from .routes.signup import sign_up_bp
 from .routes.user_route import user_bp
 from .routes.error_handlers import errors
+from .routes.sv_model import server_bp
 
 
 def init_app():
@@ -28,12 +28,12 @@ def init_app():
 
     app.register_blueprint(messages_bp, url_prefix='/get_messages')
 
-    app.register_blueprint(login_bp)
-
-    app.register_blueprint(sign_up_bp, url_prefix='/signup')
+    app.register_blueprint(login_bp, url_prefix='/login')
 
     app.register_blueprint(user_bp, url_prefix='/usuario')
 
     app.register_blueprint(errors)
+
+    app.register_blueprint(server_bp, url_prefix='/servers')
 
     return app

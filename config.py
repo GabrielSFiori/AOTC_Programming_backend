@@ -5,7 +5,7 @@ class Config:
     config = dotenv_values(".env")
 
     SECRET_KEY = config['SECRET_KEY']
-    SERVER_NAME = "127.0.0.1:5500"
+    SERVER_NAME = "127.0.0.1:5501"
     DEBUG = True
 
     DATABASE_USERNAME = config['DATABASE_USERNAME']
@@ -13,5 +13,5 @@ class Config:
     DATABASE_HOST = config['DATABASE_HOST']
     DATABASE_PORT = config['DATABASE_PORT']
 
-    TEMPLATE_FOLDER = "templates/"
+    TEMPLATE_FOLDER = "/templates/"
     STATIC_FOLDER = "static_folder/"

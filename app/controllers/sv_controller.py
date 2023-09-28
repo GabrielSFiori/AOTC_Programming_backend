@@ -1,10 +1,12 @@
 from flask import jsonify, request
 from ..models.sv_model import Server
+from mysql.connector import Error as mysqlErrors
+from ..models.exception import *
 
 
 class ServerController:
 
-    @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/servidores METODO POST
+    @classmethod  # Endpoint
     def create_server(cls):
         data = request.json
         new_server = Server(
@@ -19,15 +21,17 @@ class ServerController:
         else:
             return jsonify({"message": "Error al crear el servidor"}), 500
 
-    @classmethod  # Endpoint de Prueba http://127.0.0.1:5000/api/servidores METODO GET
-    def get_servers(cls):
-        servers = Server.get_servers()
-        if servers:
-            return jsonify([server.serialize() for server in servers]), 200
-        else:
-            return jsonify({"message": "No se encontraron servidores"}), 404
+    # Endpoint
+    @classmethod
+    def get_all_servers(cls):
+        try:
+            rta = Server.get_all_servers()
+        except mysqlErrors as error:
+            raise DataBaseError(
+                "Se produjo un error al cargar todos los usuarios de la base de datos. {}".format(error))
+        return rta, 200
 
-    # Endpoint de Prueba http://127.0.0.1:5000/api/servidores/{server_id} METODO GET
+    # Endpoint
     @classmethod
     def get_server_by_id(cls, server_id):
         server = Server.get_server_by_id(server_id)

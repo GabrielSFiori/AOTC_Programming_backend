@@ -1,4 +1,4 @@
-from ..database import DatabaseConnection
+"""from ..database import DatabaseConnection
 
 from flask import jsonify, session
 
@@ -15,10 +15,11 @@ class SignUp:
 
     @classmethod
     def signup(cls, user):
-        query = """INSERT INTO app_coding.users (first_name, last_name, users, email, passwords, birthday_date, route_img) VALUES (%(first_name)s, %(last_name)s, %(users)s, %(email)s, %(passwords)s, %(birthday_date)s, %(route_img)s);"""
-        params = user.dict
+        query = """  # INSERT INTO app_coding.users (first_name, last_name, users, email, passwords, birthday_date) VALUES (%(first_name)s, %(last_name)s, %(users)s, %(email)s, %(passwords)s, %(birthday_date)s"""
+"""        params = user.__dict__
         response = DatabaseConnection.execute_query(query, params=params)
 
         if response is not None:
             return True
-        return None
+        return None"""
+""
