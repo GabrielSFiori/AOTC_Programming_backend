@@ -2,9 +2,9 @@ from ..database import DatabaseConnection
 
 
 class User:
-    def __init__(self, user_id: int = None, users: str = None, passwords: str = None,
+    def __init__(self, user_id: str = None, users: str = None, passwords: str = None,
                  email: str = None, first_name: str = None,
-                 last_name: str = None, birthday_date: str = None, route_img: str = None):
+                 last_name: str = None, birthday_date: str = None):
         self.user_id = user_id
         self.users = users
         self.passwords = passwords
@@ -12,50 +12,46 @@ class User:
         self.first_name = first_name
         self.last_name = last_name
         self.birthday_date = birthday_date
-        self.route_img = route_img
 
 # Serializa el objeto Usuario en un diccionario
 
     def serialize(self):
-        return {
+        method_serialize = {
             "user_id": self.user_id,
             "users": self.users,
             "passwords": self.passwords,
             "email": self.email,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "birthday_date": self.birthday_date,
-            "route_img": self.route_img
+            "birthday_date": self.birthday_date
         }
+        return method_serialize
 
 # Creacion de un nuevo Usuario
 
     @classmethod
-    def crear_usuario(cls, user):
-        insert_query = "INSERT INTO users (users, passwords, email, first_name, last_name, birthday_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        values = (
-            user.username, user.passwords, user.email,
-            user.first_name, user.last_name, user.date_of_birth,
-            user.creation_date, user.last_login, user.status_id,
-            user.avatar_url
-        )
-        DatabaseConnection.execute_query(insert_query, values)
+    def create_user(cls, user):
+        query = "INSERT INTO app_coding.users (users, passwords, email, first_name, last_name, birthday_date) values (%s, %s, %s, %s, %s, %s)"
+        params = (
+            user.users,
+            user.passwords,
+            user.email,
+            user.first_name,
+            user.last_name,
+            user.birthday_date)
+        DatabaseConnection.execute_query_pr(query, params)
 
 # Obtener un Usuario
-
     @classmethod
     def get_all(cls):
-        """Get all users
-        Returns:
-            - list: List of User objects
-        """
-        query = """SELECT * FROM app_coding.users"""
-
-        results = DatabaseConnection.fetch_all(query=query)
-        usuarios = list(results)
-        return usuarios
+        consulta = """SELECT * FROM app_coding.users"""
+        results = DatabaseConnection.get_all(
+            consulta=consulta, diccionario=True)
+        users = list(results)
+        return users
 
 # Obtener un Usuario por ID
+
     @classmethod
     def get(cls, user):
         """Get users for id
@@ -63,7 +59,7 @@ class User:
             - list: List of Film objects
         """
         query = """SELECT user_id, users, passwords, email, first_name, last_name, birthday_date
-                FROM app_coding.users 
+                FROM app_coding.users
                 WHERE user_id = %s"""
         params = (user.user_id,)
         results = DatabaseConnection.fetch_one(query, params=params)
@@ -73,42 +69,48 @@ class User:
         return None
 
 # Actualizar un Usuario
+
     @classmethod
-    def actualizar_usuario(cls, user_id, new_date):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
-
-        update_query = "UPDATE users SET users=%s, password=%s, email=%s, first_name=%s, last_name=%s, date_of_birth=%s, creation_date=%s, last_login=%s, status_id=%s, avatar_url=%s WHERE user_id=%s"
-        values = (
-            new_date['users'], new_date['password'],
-            new_date['email'], new_date['first_name'],
-            new_date['last_name'], new_date['birthday_date'],
-            new_date['creation_date'], new_date['last_login'],
-            new_date['status_id'], new_date['avatar_url'], user_id
+    def update_user(cls, user_id, new_data):
+        query = "UPDATE app_coding.users SET users=%s, passwords=%s, email=%s, first_name=%s, last_name=%s,    birthday_date=%s WHERE user_id=%s"
+        params = (
+            new_data['users'], new_data['passwords'],
+            new_data['email'], new_data['first_name'],
+            new_data['last_name'], new_data['birthday_date'], user_id
         )
+        DatabaseConnection.execute_query_pr(query=query, params=params)
 
-        cursor.execute(update_query, values)
-        conn.commit()
+    @classmethod
+    def update_user_pr(cls, user):
+        query = """UPDATE app_coding.users as u SET
+        u.first_name = %s,
+        u.last_name = %s,
+        u.users = %s,
+        u.email = %s,
+        u.passwords = %s,
+        u.birthday_date = %s
+        WHERE u.user_id = %s"""
+        params = (user.first_name,
+                  user.last_name,
+                  user.users,
+                  user.email,
+                  user.passwords,
+                  user.birthday_date,
+                  user.user_id)
+        DatabaseConnection.execute_query_pr(
+            query=query, params=params)
 
-        cursor.close()
-        conn.close()
-
-        return True
 # Eliminar un usuario
 
     @classmethod
-    def eliminar_usuario(cls, user_id):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
-
-        delete_query = "DELETE FROM users WHERE user_id=%s"
-        cursor.execute(delete_query, (user_id,))
-        conn.commit()
-
-        cursor.close()
-        conn.close()
-
-        return True
+    def delete(cls, user_id: int):
+        """Delete a user
+        Args:
+            - film (Film): Film object with the id attribute
+        """
+        query = "DELETE FROM app_coding.users WHERE user_id = %s"
+        params = (user_id,)
+        DatabaseConnection.execute_query(query, params=params)
 
     @classmethod
     def user_exist(cls, user_id):
