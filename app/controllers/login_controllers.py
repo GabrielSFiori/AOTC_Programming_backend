@@ -21,5 +21,5 @@ class LoginController():
 
     @classmethod  # ENDPOINT de prueba para http://127.0.0.1:5000/login/logout
     def logout(cls):
-        session.pop('username', None)
+        session.pop('users', None)
         return {"message": "Sesion cerrada"}, 200

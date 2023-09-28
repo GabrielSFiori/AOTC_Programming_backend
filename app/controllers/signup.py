@@ -10,11 +10,11 @@ class SignUpController:
         """Realiza el llamado al metodo para realizar el signup"""
         data = request.json
         user = SignUp(
-            name=data.get('first_name'),
-            lastname=data.get('last_name'),
-            username=data.get('username'),
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            users=data.get('users'),
             email=data.get('email'),
-            password=data.get('passwords'),
+            passwords=data.get('passwords'),
             birthday_date=data.get('birthday_date'),
             route_img=data.get('route_img')
         )
