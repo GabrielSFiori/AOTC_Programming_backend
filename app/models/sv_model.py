@@ -30,11 +30,12 @@ class Server:
     @classmethod
     def create_server(cls, server):
 
-        query = "INSERT INTO app_coding.servers (name_server, description_server) VALUES (%s, %s)"
-        params = (server.name_server, server.description_server)
+        query = "INSERT INTO app_coding.servers (name_server, description_server, property_id) VALUES (%s, %s, %s)"
+        params = (server.name_server,
+                  server.description_server, server.property_id)
         DatabaseConnection.execute_query_pr(query, params)
 
-# Obtener un Servidor
+# Obtener todos los servidores
     @classmethod
     def get_all_servers(cls):
         consulta = """SELECT * FROM app_coding.servers"""
@@ -43,35 +44,49 @@ class Server:
         users = list(results)
         return users
 
+    @classmethod
+    def get_server(cls, server_id):
+        """Get Server"""
+        query = """
+            SELECT server_id, name_server, description_server, property_id
+            FROM servers
+            WHERE server_id = %s
+        """
+        server_data = DatabaseConnection.fetch_one(query, (server_id,))
+        if server_data is not None:
+            server = Server(
+                server_id=server_data[0],
+                server_name=server_data[1],
+                server_description=server_data[2],
+                owner_id=server_data[3],
+            )
+            return server
+
+        return None
+
+
 # Actualizar un Servidor
 
     @classmethod
-    def update_server(cls, server_id, new_data):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
+    def update_user_pr(cls, server):
+        query = """UPDATE app_coding.servers as u SET
+        u.name_server = %s,
+        u.description_server = %s,
+        WHERE u.server_id = %s"""
+        params = (server.name_server,
+                  server.description_server,
+                  server.server_id)
+        DatabaseConnection.execute_query_pr(
+            query=query, params=params)
 
-        update_query = "UPDATE servers SET name_server=%s, description_server=%s WHERE server_id=%s"
-        values = (new_data['name'], new_data['description'], server_id)
-
-        cursor.execute(update_query, values)
-        conn.commit()
-
-        cursor.close()
-        conn.close()
-
-        return True
 # Borrar un Servidor
 
     @classmethod
-    def delete_server(cls, server_id):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
-
-        delete_query = "DELETE FROM servers WHERE server_id=%s"
-        cursor.execute(delete_query, (server_id,))
-        conn.commit()
-
-        cursor.close()
-        conn.close()
-
-        return True
+    def delete_server(cls, server_id: int):
+        """Delete a user
+        Args:
+            - film (Film): Film object with the id attribute
+        """
+        query = "DELETE FROM app_coding.users WHERE user_id = %s"
+        params = (server_id,)
+        DatabaseConnection.execute_query(query, params=params)

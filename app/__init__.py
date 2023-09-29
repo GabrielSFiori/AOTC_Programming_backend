@@ -7,7 +7,7 @@ from .routes.chat_route import messages_bp
 from .routes.login_route import login_bp
 from .routes.user_route import user_bp
 from .routes.error_handlers import errors
-from .routes.sv_model import server_bp
+from .routes.sv_route import server_bp
 
 
 def init_app():

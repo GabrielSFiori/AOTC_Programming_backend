@@ -126,4 +126,13 @@ Criterios a tener en cuenta
 ● No se admitirá el uso de Flask-SQLAlchemy para manejar base de datos
 en el proyecto integrador. Las consultas a MySQL deben realizarse
 mediante python-mysql.connector.
-● No se admite el uso de frameworks de CSS, como
+
+
+
+
+
+
+
+[Gabriel Fiori] https://github.com/GabrielSFiori
+[Matias Fiori] https://github.com/Matufiori
+[Armando Ezequiel Nuñez] https://github.com/ezee93

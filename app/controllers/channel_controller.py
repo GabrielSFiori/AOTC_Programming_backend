@@ -18,7 +18,6 @@ class ChannelController:
 
         return jsonify({"channel_id": channel_id}) if channel_id else jsonify({"message": "Error al crear el canal"}), response_status
 
-    # Endpoint de prueba http://127.0.0.1:5000/api/canales/1 METODO GET Donde "1" es el ID del servidor del cual deseas obtener los canales.
     @classmethod
     def get_channels_by_server(cls, server_id):
         channels = ChannelModel.get_channels_by_server(server_id)
@@ -26,7 +25,6 @@ class ChannelController:
 
         return jsonify([channel.serialize() for channel in channels]) if channels else jsonify({"message": "No se encontraron canales para el servidor"}), response_status
 
-    # Endpoint de prueba http://127.0.0.1:5000/api/canales/2 METODO GET Donde "2" es el ID del canal que deseas obtener.
     @classmethod
     def get_channel_by_id(cls, channel_id):
         channel = ChannelModel.get_channel_by_id(channel_id)
@@ -34,7 +32,7 @@ class ChannelController:
 
         return jsonify(channel.serialize()) if channel else jsonify({"message": "Canal no encontrado"}), response_status
 
-    @classmethod  # Endpoint de prueba http://127.0.0.1:5000/api/canales/2 METODO PUT
+    @classmethod
     def update_channel(cls, channel_id):
         data = request.json
 
@@ -43,7 +41,7 @@ class ChannelController:
         else:
             return jsonify({"message": "Error al actualizar el canal"}), 500
 
-    @classmethod  # Endpoint de prueba http://127.0.0.1:5000/api/canales/2 METODO DELETE
+    @classmethod
     def delete_channel(cls, channel_id):
         if ChannelModel.delete_channel(channel_id):
             return jsonify({"message": "Canal eliminado exitosamente"}), 200

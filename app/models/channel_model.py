@@ -19,34 +19,22 @@ class ChannelModel:
 
     @classmethod
     def create_channel(cls, channel):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
+        query = "INSERT INTO app_coding.channels (server_id, name, description) values (%s, %s, %s)"
+        params = (
+            channel.server_id,
+            channel.name,
+            channel.description
+        )
+        DatabaseConnection.execute_query_pr(query, params)
 
-        insert_query = "INSERT INTO channels (server_id, name) VALUES (%s, %s)"
-        values = (channel.server_id, channel.name)
-
-        cursor.execute(insert_query, values)
-        conn.commit()
-
-        channel_id = cursor.lastrowid
-        cursor.close()
-        conn.close()
-
-        return channel_id
 # Obtener Canales de un Servidor
 
     @classmethod
-    def get_channels_by_server(cls, server_id):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor(dictionary=True)
-
-        select_query = "SELECT * FROM channels WHERE server_id = %s"
-        cursor.execute(select_query, (server_id,))
-        channels = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-
+    def get_channels_by_server(cls, channels):
+        consulta = """SELECT * FROM app_coding.servers WHERE server_id = %s"""
+        results = DatabaseConnection.get_all(
+            consulta=consulta, diccionario=True)
+        channels = list(results)
         return [cls(**channel) for channel in channels]
 # Obtener Canal por su ID
 
@@ -67,31 +55,21 @@ class ChannelModel:
 
     @classmethod
     def update_channel(cls, channel_id, new_data):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
+        query = "UPDATE channels SET name = %s WHERE channel_id = %s"
+        params = (new_data['name'], channel_id)
 
-        update_query = "UPDATE channels SET name = %s WHERE channel_id = %s"
-        values = (new_data['name'], channel_id)
-
-        cursor.execute(update_query, values)
-        conn.commit()
-
-        cursor.close()
-        conn.close()
+        DatabaseConnection.execute_query_pr(
+            query=query, params=params)
 
         return True
 # Borrar un Canal
 
     @classmethod
     def delete_channel(cls, channel_id):
-        conn = DatabaseConnection.connect()
-        cursor = conn.cursor()
-
-        delete_query = "DELETE FROM channels WHERE channel_id = %s"
-        cursor.execute(delete_query, (channel_id,))
-        conn.commit()
-
-        cursor.close()
-        conn.close()
-
-        return True
+        """Delete a user
+        Args:
+            - film (Film): Film object with the id attribute
+        """
+        query = "DELETE FROM app_coding.channel WHERE channel_id = %s"
+        params = (channel_id,)
+        DatabaseConnection.execute_query(query, params=params)

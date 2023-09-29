@@ -10,8 +10,9 @@ class ServerController:
     def create_server(cls):
         data = request.json
         new_server = Server(
-            name=data.get('name_server'),
-            description=data.get('description_server')
+            name_server=data.get('name_server'),
+            description=data.get('description_server'),
+            property_id=data.get('property_id')
         )
 
         server_id = Server.create_server(new_server)
@@ -31,16 +32,21 @@ class ServerController:
                 "Se produjo un error al cargar todos los usuarios de la base de datos. {}".format(error))
         return rta, 200
 
-    # Endpoint
     @classmethod
-    def get_server_by_id(cls, server_id):
-        server = Server.get_server_by_id(server_id)
+    def get_server(cls, server_id):
+        """Get Server"""
+        server = Server.get_server(server_id)
         if server:
-            return jsonify(server.serialize()), 200
-        else:
-            return jsonify({"message": "Servidor no encontrado"}), 404
+            server_dict = {
+                "server_id": server.server_id,
+                "name_server": server.name_server,
+                "description_server": server.description_server,
+                "property_id": server.property_id,
+            }
+            return jsonify(server_dict), 200
 
-    # Endpoint de Prueba http://127.0.0.1:5000/api/servidores/{server_id} METODO PUT
+        raise NotFound(server_id, "server")
+
     @classmethod
     def update_server(cls, server_id):
         data = request.json

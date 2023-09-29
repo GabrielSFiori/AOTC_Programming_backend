@@ -1,58 +1,98 @@
 from ..database import DatabaseConnection
-from flask import jsonify
-from datetime import datetime
+from ..models.exception import BadRequest
 
 
-class Messages:
-    def __init__(self, id_msg=None, id_user=None, content=None, date_day=None, date_time=None, id_channel=None):
-        self.id_msg = id_msg
-        self.id_user = id_user
-        self.content = content
-        self.date_day = date_day
-        self.date_time = date_time
-        self.id_channel = id_channel
-
-    def formatted_response(self):
-        return {
-            'id_msg': int(self.id_msg),
-            'id_user': int(self.id_user),
-            'content': str(self.content),
-            'date_day': str(self.date_day),
-            'date_time': str(self.date_time),
-            'id_channel': int(self.id_channel),
-        }
+class Message:
+    def __init__(self, **kwargs) -> None:
+        self.id_msg = kwargs.get('id_msg', None)
+        self.id_user = kwargs.get('id_user', None)
+        self.content = kwargs.get('content', None)
+        self.date_day = kwargs.get('date_day', None)
+        self.date_time = kwargs.get('date_time', None)
+        self.id_channel = kwargs.get('id_channel', None)
 
     @classmethod
-    def get_messages(cls, messages):
-        query = """SELECT chats.id_msg, chats.id_user, chats.content, DATE_FORMAT(chats.date_day, '%d-%m-%Y'), TIME_FORMAT(chats.date_time, '%H:%i'), chats.id_channel FROM app_coding.content as chats WHERE id_channel = %s;"""
-        params = messages.id_channel,
-        responses = DatabaseConnection.fetch_all(query, params=params)
-        all_messages = []
-
-        if responses is not None:
-            for response in responses:
-                all_messages.append(cls(*response))
-            return all_messages
+    def get_message(cls, id_msg):
+        query = "SELECT * FROM messages WHERE message_id = %s"
+        msg = DatabaseConnection.fetch_one(query, (id_msg,))
+        if msg is not None:
+            return Message(
+                id_msg=msg[0],
+                id_user=msg[1],
+                content=msg[2],
+                date_day=msg[3],
+                date_time=msg[4],
+                id_channel=msg[5]
+            )
         return None
 
     @classmethod
-    def create_message(cls, messages):
-        query = """INSERT INTO app_coding.chats (id_msg, id_user, content, date_day, date_time, id_channel) VALUES (%s, %s, %s, CURDATE(), CURTIME(), %s);"""
+    def get_messages(cls, id_msg) -> list['Message']:
+        query = "SELECT chats.id_msg, chats.id_user, chats.content, chats.date_day, chats.date_time, chats.id_channel FROM chats JOIN users ON chats.id_user = users.user_id WHERE id_msg = %s"
+        msgs = DatabaseConnection.fetch_all(query, (id_msg,))
 
-        params = messages.id_msg, messages.id_user, messages.content, messages.dateday, messages.date_time, messages.id_channel
-        DatabaseConnection.execute_query(query, params=params)
+        msg_list = []
+        for msg in msgs:
+            msg_data = Message(
+                id_msg=msg[0],
+                id_user=msg[1],
+                content=msg[2],
+                date_day=msg[3],
+                date_time=msg[4],
+                id_channel=msg[5]
+            )
+            msg_list.append(msg_data)
+
+        return msg_list
 
     @classmethod
-    def update_message(cls, id_msg, message):
-        query = """UPDATE app_coding.chats AS content SET chats.content = %s, chats.date_day = CURDATE(), chats.date_time = CURTIME() WHERE chats.id_msg = %s;"""
-
-        params = message.content, id_msg
-        DatabaseConnection.execute_query(query, params=params)
+    def delete_message(cls, id_msg) -> None:
+        query = "DELETE FROM chats WHERE id_msg = %s"
+        DatabaseConnection.execute_query(query, (id_msg,))
 
     @classmethod
-    def delete_message(cls, id_msg):
-        query = """DELETE FROM app_coding.content WHERE content.id_msg = %s;"""
+    def create_message(cls, message: 'Message') -> None:
+        query = "INSERT INTO app_codding.chats (content, id_user, id_channel) VALUES (%s, %s, %s)"
+        params = (message.content, message.id_user, message.id_channel)
+        DatabaseConnection.execute_query(query, params)
 
-        params = (id_msg,)
+    @classmethod
+    def update_message(cls, params: tuple) -> None:
+        query = "UPDATE app_codding.chats SET content = %s, date_day = CURRENT_TIMESTAMP() WHERE id_msg = %s"
+        DatabaseConnection.execute_query(query, params)
 
-        DatabaseConnection.execute_query(query, params=params)
+    @classmethod
+    def exist(cls, msg_id: int):
+        query = "SELECT 1 FROM app_codding.chats WHERE id_msg = %s"
+        result = DatabaseConnection.fetch_one(query, (msg_id,))
+        return result is not None
+
+    @classmethod
+    def validate_data(cls, data) -> 'Message':
+        """Validate message data"""
+        msg_content = data[0]
+        if len(msg_content) < 1:
+            raise BadRequest(
+                "El cuerpo del mensaje debe tener al menos un carácter")
+
+        id_msg_user = data[1]
+        if not isinstance(id_msg_user, int):
+            raise BadRequest("El ID de usuario debe ser un número entero")
+
+        id_msg_channel = data[2]
+        if not isinstance(id_msg_channel, int):
+            raise BadRequest(
+                "El identificador de canal debe ser un número entero")
+
+        return Message(content=msg_content, id_user=id_msg_user, id_channel=id_msg_channel)
+
+    def serialize(self):
+        return {
+            'message_id': self.id_msg,
+            'message_body': self.content,
+            'user_id': self.id_user,
+            'channel_id': self.id_channel,
+            'creation_date': self.date_day,
+            'update_date': self.date_time
+
+        }

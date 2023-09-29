@@ -27,7 +27,7 @@ class User:
         }
         return method_serialize
 
-# Creacion de un nuevo Usuario
+# Creacion de un nuevo Usuario                                                                                                                                                                                               io
 
     @classmethod
     def create_user(cls, user):
